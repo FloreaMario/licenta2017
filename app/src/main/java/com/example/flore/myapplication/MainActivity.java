@@ -12,11 +12,14 @@ import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import org.jtransforms.fft.DoubleFFT_1D;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,7 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
             public void run() {
 
-                writeAudioDataToFile();
+
+                performFFT();
+             //   writeAudioDataToFile();
 
             }
         }, "AudioRecorder Thread");
@@ -89,6 +94,50 @@ public class MainActivity extends AppCompatActivity {
             sData[i] = 0;
         }
         return bytes;
+    }
+    private void performFFT() {
+        double maxVal, freq, binNo = 0;
+
+        short sData[] = new short[BufferElements2Rec];
+
+        DoubleFFT_1D fft1d = new DoubleFFT_1D(BufferElements2Rec);
+        double[] fftBuffer = new double[BufferElements2Rec * 2];
+        while (isRecording) {
+            recorder.read(sData, 0, BufferElements2Rec);
+
+
+            for (int i = 0; i < BufferElements2Rec - 1; ++i) {
+                fftBuffer[2 * i] = sData[i];
+                fftBuffer[2 * i + 1] = 0;
+            }
+
+            fft1d.complexForward(fftBuffer);
+
+            double[] magnitude = new double[BufferElements2Rec / 2];
+            maxVal = 0;
+            for (int i = 0; i < (BufferElements2Rec / 2) - 1; ++i) {
+
+                double real = fftBuffer[2 * i];
+                double imaginary = fftBuffer[2 * i + 1];
+
+                magnitude[i] = Math.sqrt(real * real + imaginary * imaginary);
+                Log.i("mag", String.valueOf(magnitude[i]) + " " + i);
+
+                //find peak magnitude
+                for (int j = 0; j < (BufferElements2Rec / 2) - 1; ++j) {
+                    if (magnitude[j] > maxVal) {
+                        maxVal = (int) magnitude[j];
+                        binNo = j;
+                    }
+                }
+
+                //results
+                freq = 8000 * binNo / (BufferElements2Rec / 2);
+                freq = freq / 2;
+                Log.i("freq", "Bin " + String.valueOf(binNo));
+                Log.i("freq", String.valueOf(freq) + "Hz");
+            }
+        }
     }
 
     private void writeAudioDataToFile() {
@@ -173,5 +222,32 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
+/*
+    private void playSound(double frequency, int duration) {
+        // AudioTrack definition
+        int mBufferSize = AudioTrack.getMinBufferSize(44100,
+                AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_8BIT);
+
+        AudioTrack mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
+                AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
+                mBufferSize, AudioTrack.MODE_STREAM);
+
+        // Sine wave
+        double[] mSound = new double[4410];
+        short[] mBuffer = new short[duration];
+        for (int i = 0; i < mSound.length; i++) {
+            mSound[i] = Math.sin((2.0*Math.PI * i/(44100/frequency)));
+            mBuffer[i] = (short) (mSound[i]*Short.MAX_VALUE);
+        }
+
+        mAudioTrack.setStereoVolume(AudioTrack.getMaxVolume(), AudioTrack.getMaxVolume());
+        mAudioTrack.play();
+
+        mAudioTrack.write(mBuffer, 0, mSound.length);
+        mAudioTrack.stop();
+        mAudioTrack.release();
+
+    }*/
 }
 
