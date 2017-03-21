@@ -13,51 +13,29 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:id="@+id/textView" />
+        android:text="Please chose in what mode you want the app to work"
+        android:id="@+id/textView"
+        android:textStyle="normal|bold" />
 
     <Button
-        android:text="Start"
+        android:text="Sender Mode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="159dp"
-        android:id="@+id/btnStart" />
+        android:id="@+id/btnConSender" />
 
     <Button
-        android:text="Stop"
+        android:text="Receiver Mode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/btnStart"
-        android:layout_toRightOf="@+id/btnStart"
-        android:layout_toEndOf="@+id/btnStart"
+        android:layout_alignBottom="@+id/btnConSender"
+        android:layout_toRightOf="@+id/btnConSender"
+        android:layout_toEndOf="@+id/btnConSender"
         android:layout_marginLeft="79dp"
         android:layout_marginStart="79dp"
-        android:id="@+id/btnStop" />
+        android:id="@+id/btnConReceiver" />
 
-    <Button
-        android:text="Play"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="14dp"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="83dp"
-        android:id="@+id/btnGenerate"
-        android:layout_below="@+id/btnStop"
-        android:layout_toRightOf="@+id/btnStart"
-        android:layout_toEndOf="@+id/btnStart" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="Frequency"
-        android:ems="10"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="27dp"
-        android:id="@+id/txtFreq" />
 </RelativeLayout>
