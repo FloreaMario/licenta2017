@@ -10,4 +10,59 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.flore.myapplication.SenderActivity">
 
+    <TextView
+        android:text="input desired time of emission"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="66dp"
+        android:id="@+id/textView3"
+        android:layout_alignParentTop="true"
+        android:layout_alignLeft="@+id/txtFreq"
+        android:layout_alignStart="@+id/txtFreq" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="1000"
+        android:ems="10"
+        android:layout_marginLeft="29dp"
+        android:layout_marginStart="29dp"
+        android:id="@+id/txtFreq"
+        android:layout_below="@+id/textView2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="input desired frequency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/textView3"
+        android:layout_alignLeft="@+id/txtFreq"
+        android:layout_alignStart="@+id/txtFreq" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="44100"
+        android:ems="10"
+        android:id="@+id/txtTime"
+        android:layout_below="@+id/textView3"
+        android:layout_alignLeft="@+id/textView3"
+        android:layout_alignStart="@+id/textView3" />
+
+    <Button
+        android:text="Emit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="110dp"
+        android:id="@+id/btnEmit"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/textView3"
+        android:layout_alignEnd="@+id/textView3"
+        android:layout_marginRight="23dp"
+        android:layout_marginEnd="23dp" />
 </RelativeLayout>

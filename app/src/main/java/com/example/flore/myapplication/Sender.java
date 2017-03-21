@@ -10,7 +10,7 @@ import android.media.AudioTrack;
 
 public class Sender {
 
-    private void playSound(double frequency, int duration) {
+    public void playSound(double frequency, int duration) {
         // AudioTrack definition
         int mBufferSize = AudioTrack.getMinBufferSize(44100,
                 AudioFormat.CHANNEL_OUT_MONO,
@@ -21,7 +21,7 @@ public class Sender {
                 mBufferSize, AudioTrack.MODE_STREAM);
 
         // Sine wave
-        double[] mSound = new double[4410];
+        double[] mSound = new double[duration];
         short[] mBuffer = new short[duration];
         for (int i = 0; i < mSound.length; i++) {
             mSound[i] = Math.sin((2.0*Math.PI * i/(44100/frequency)));
