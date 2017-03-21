@@ -3,16 +3,23 @@ package com.example.flore.myapplication;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Environment;
 import android.util.Log;
 
 import org.jtransforms.fft.DoubleFFT_1D;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Created by flore on 3/21/2017.
  */
 
 public class Receiver {
-//Variables
+    //Variables
     private static final int RECORDER_SAMPLERATE = 8000;
     private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
     private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
@@ -27,7 +34,7 @@ public class Receiver {
     int BufferElements2Rec = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
     int BytesPerElement = 2; // 2 bytes in 16bit format
 
-//Methods
+    //Methods
     public void startRecording() {
 
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
@@ -41,8 +48,8 @@ public class Receiver {
 
             public void run() {
 
-                performFFTonRecording();
-
+                //performFFTonRecording();
+                writeAudioDataToFile();
             }
         }, "AudioRecorder Thread");
         recordingThread.start();
@@ -70,10 +77,29 @@ public class Receiver {
 
         DoubleFFT_1D fft1d = new DoubleFFT_1D(BufferElements2Rec);
         double[] fftBuffer = new double[BufferElements2Rec * 2];
+        FileOutputStream os = null;
+
+        //get the path to sdcard
+        File pathToExternalStorage = Environment.getExternalStorageDirectory();
+        //to this path add a new directory path and create new App dir (InstroList) in /documents Dir
+        File appDirectory = new File(pathToExternalStorage.getAbsolutePath() + "/teste/teste");
+        // have the object build the directory structure, if needed.
+        appDirectory.mkdirs();
+        String fileName = "test.txt";
+        File filePath = new File(appDirectory, fileName);
+        // Write the output audio in byte
+        //  String filePath = "/sdcard/8k16bitMono.pcm";
+
+        //short sData1[] = new short[BufferElements2Rec];
+        try {
+            os = new FileOutputStream(filePath);
+        } catch (FileNotFoundException e) {
+            Log.e("ERRR", "Could not create file", e);
+        }
         while (isRecording) {
             recorder.read(sData, 0, BufferElements2Rec);
 
-
+            // hanningWindow()
             for (int i = 0; i < BufferElements2Rec - 1; ++i) {
                 fftBuffer[2 * i] = sData[i];
                 fftBuffer[2 * i + 1] = 0;
@@ -104,24 +130,58 @@ public class Receiver {
                 freq = freq / 2;
                 Log.i("freq", "Bin " + String.valueOf(binNo));
                 Log.i("freq", String.valueOf(freq) + "Hz");
+
+
+                byte bData[] = toByteArray(fftBuffer);
+
+                try {
+                    os.write(bData, 0, BufferElements2Rec * BytesPerElement);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
+        try {
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-}
 
-/*
+    private byte[] short2byte(short[] sData) {
+        int shortArrsize = sData.length;
+        byte[] bytes = new byte[shortArrsize * 2];
+
+        for (int i = 0; i < shortArrsize; i++) {
+            bytes[i * 2] = (byte) (sData[i] & 0x00FF);
+            bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
+            sData[i] = 0;
+        }
+        return bytes;
+    }
+
+    public static byte[] toByteArray(double[] doubleArray) {
+        int times = Double.SIZE / Byte.SIZE;
+        byte[] bytes = new byte[doubleArray.length * times];
+        for (int i = 0; i < doubleArray.length; i++) {
+            ByteBuffer.wrap(bytes, i * times, times).putDouble(doubleArray[i]);
+        }
+        return bytes;
+    }
+
+
     private void writeAudioDataToFile() {
 
         //get the path to sdcard
         File pathToExternalStorage = Environment.getExternalStorageDirectory();
         //to this path add a new directory path and create new App dir (InstroList) in /documents Dir
-        File appDirectory = new File(pathToExternalStorage.getAbsolutePath()  + "/teste/teste");
+        File appDirectory = new File(pathToExternalStorage.getAbsolutePath() + "/teste/teste");
         // have the object build the directory structure, if needed.
         appDirectory.mkdirs();
         String fileName = "8k16bitMono.pcm";
-        File filePath = new File (appDirectory, fileName);
+        File filePath = new File(appDirectory, fileName);
         // Write the output audio in byte
-      //  String filePath = "/sdcard/8k16bitMono.pcm";
+        //  String filePath = "/sdcard/8k16bitMono.pcm";
 
         short sData[] = new short[BufferElements2Rec];
 
@@ -129,7 +189,7 @@ public class Receiver {
         try {
             os = new FileOutputStream(filePath);
         } catch (FileNotFoundException e) {
-            Log.e("ERRR", "Could not create file",e);
+            Log.e("ERRR", "Could not create file", e);
         }
 
         while (isRecording) {
@@ -153,4 +213,5 @@ public class Receiver {
             e.printStackTrace();
         }
     }
-*/
+
+}
