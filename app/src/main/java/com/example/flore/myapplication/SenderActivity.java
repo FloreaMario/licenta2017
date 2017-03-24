@@ -6,8 +6,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import static com.example.flore.myapplication.R.id.time;
-
 public class SenderActivity extends AppCompatActivity {
     Sender mySender = new Sender();
     EditText txtFreq, txtTime;
@@ -29,7 +27,7 @@ public class SenderActivity extends AppCompatActivity {
 
     private View.OnClickListener btnClick = new View.OnClickListener() {
         public void onClick(View v) {
-            final EditText txtFreq = (EditText)findViewById(R.id.txtFreq);
+            final EditText txtFreq = (EditText)findViewById(R.id.txtFreqV);
             final EditText txtTime = (EditText)findViewById(R.id.txtTime);
             switch (v.getId()) {
 

@@ -5,7 +5,8 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
-
+import android.widget.TextView;
+import android.view.View;
 import org.jtransforms.fft.DoubleFFT_1D;
 
 import java.io.File;
@@ -33,6 +34,7 @@ public class Receiver {
 
     int BufferElements2Rec = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
     int BytesPerElement = 2; // 2 bytes in 16bit format
+    double[] fftBuffer = new double[BufferElements2Rec * 2];
 
     //Methods
     public void startRecording() {
@@ -71,25 +73,17 @@ public class Receiver {
     }
 
     private void performFFTonRecording() {
-        double maxVal, freq, binNo = 0;
-
+        /**
+         * Function that performs the fast fourier transform on the audio sample
+         */
         short sData[] = new short[BufferElements2Rec];
 
         DoubleFFT_1D fft1d = new DoubleFFT_1D(BufferElements2Rec);
 
-        double[] fftBuffer = new double[BufferElements2Rec * 2];
 
         while (isRecording) {
             //recording Audio data into sData
             recorder.read(sData, 0, BufferElements2Rec);
-            /*
-            for (int i = 0; i < BufferElements2Rec - 1; ++i) {
-                fftBuffer[2 * i] = sData[i];
-                fftBuffer[2 * i + 1] = 0;
-            }
-            */
-            //perform a hamming window on the signal in order to filter noise
-            //  double[] a = new double[(BufferElements2Rec + 24 * BufferElements2Rec) * 2];
 
             System.arraycopy(applyWindow(sData), 0, fftBuffer, 0, BufferElements2Rec);
             //fft on audio
@@ -113,34 +107,7 @@ public class Receiver {
               /* calculate the frequency */
             double frequency = ((double) RECORDER_SAMPLERATE * maxInd / (BufferElements2Rec/ 2)/2);
             Log.i("freq", String.valueOf(frequency) + "Hz");
-            /*
-            double[] magnitude = new double[BufferElements2Rec / 2];
-            maxVal = 0;
-            for (int i = 0; i < (BufferElements2Rec / 2) - 1; ++i) {
 
-                double real = fftBuffer[2 * i];
-                double imaginary = fftBuffer[2 * i + 1];
-
-                magnitude[i] = Math.sqrt(real * real + imaginary * imaginary);
-                Log.i("mag", String.valueOf(magnitude[i]) + " " + i);
-
-                //find peak magnitude
-                for (int j = 0; j < (BufferElements2Rec / 2) - 1; ++j) {
-                    if (magnitude[j] > maxVal) {
-                        maxVal = (int) magnitude[j];
-                        binNo = j;
-                    }
-                }
-
-                //results
-                freq = 8000 * binNo / (BufferElements2Rec / 2);
-                freq = freq / 2;
-                Log.i("freq", "Bin " + String.valueOf(binNo));
-                Log.i("freq", String.valueOf(freq) + "Hz");
-
-            }
-        }
-        */
         }
     }
 
@@ -190,49 +157,34 @@ public class Receiver {
         }
         return res;
     }
+
+    public boolean verifyFreq(double frequency)
+        {
+        /**
+         * Function receives as parameter a desired frequency. IT will check to see if
+         * the frequency is present in the audio environment, and reflect on the UI the changes
+         */
+        int maxInd = 0;
+        double fftValue;
+        double FFTTHRESHOLD = 50000;
+        double firstVal;
+        boolean returnVal;
+
+        //double frequency = ((double) RECORDER_SAMPLERATE * maxInd / (BufferElements2Rec/ 2)/2);
+
+        // get from the frequency the indicator where we could find it
+        firstVal = (2 * frequency * (BufferElements2Rec/ 2))/RECORDER_SAMPLERATE;
+        maxInd = (int)(firstVal + 0.5d);
+
+        fftValue = fftBuffer[maxInd * 2];
+        if(fftValue > FFTTHRESHOLD)
+        {
+            returnVal = true;
+        }
+        else
+        {
+            returnVal = false;
+        }
+        return returnVal;
+    }
 }
-/*
-    private void writeAudioDataToFile() {
-
-        //get the path to sdcard
-        File pathToExternalStorage = Environment.getExternalStorageDirectory();
-        //to this path add a new directory path and create new App dir (InstroList) in /documents Dir
-        File appDirectory = new File(pathToExternalStorage.getAbsolutePath() + "/teste/teste");
-        // have the object build the directory structure, if needed.
-        appDirectory.mkdirs();
-        String fileName = "8k16bitMono.pcm";
-        File filePath = new File(appDirectory, fileName);
-        // Write the output audio in byte
-        //  String filePath = "/sdcard/8k16bitMono.pcm";
-
-        short sData[] = new short[BufferElements2Rec];
-
-        FileOutputStream os = null;
-        try {
-            os = new FileOutputStream(filePath);
-        } catch (FileNotFoundException e) {
-            Log.e("ERRR", "Could not create file", e);
-        }
-
-        while (isRecording) {
-            // gets the voice output from microphone to byte format
-            recorder.read(sData, 0, BufferElements2Rec);
-            System.out.println("Short wirting to file" + sData.toString());
-            try {
-                // writes the data to file from buffer stores the voice buffer
-                byte bData[] = short2byte(sData);
-
-                os.write(bData, 0, BufferElements2Rec * BytesPerElement);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        try {
-            os.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-
