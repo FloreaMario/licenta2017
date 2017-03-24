@@ -31,4 +31,65 @@
         android:layout_alignBottom="@+id/btnStart"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:text="Press start to start recording"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/textView4" />
+
+    <Button
+        android:text="Verify Freq"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnVerifyFreq"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/btnStop"
+        android:layout_alignStart="@+id/btnStop"
+        android:layout_marginBottom="96dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="368"
+        android:ems="10"
+        android:id="@+id/txtFreq"
+        android:layout_alignBaseline="@+id/btnVerifyFreq"
+        android:layout_alignBottom="@+id/btnVerifyFreq"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="Input the frequency you want to check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView5"
+        android:layout_above="@+id/btnVerifyFreq"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="Result : "
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtFreq"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="15dp"
+        android:id="@+id/textView6" />
+
+    <TextView
+        android:text="Present/Not Present"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/textView6"
+        android:layout_toLeftOf="@+id/btnVerifyFreq"
+        android:layout_toStartOf="@+id/btnVerifyFreq"
+        android:layout_marginRight="23dp"
+        android:layout_marginEnd="23dp"
+        android:id="@+id/txtResult" />
 </RelativeLayout>

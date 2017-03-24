@@ -27,7 +27,7 @@ public class Receiver {
     private AudioRecord recorder = null;
     private Thread recordingThread = null;
     private boolean isRecording = false;
-
+    private double[] window;
     int bufferSize = AudioRecord.getMinBufferSize(RECORDER_SAMPLERATE,
             RECORDER_CHANNELS, RECORDER_AUDIO_ENCODING);
 
@@ -78,36 +78,42 @@ public class Receiver {
         DoubleFFT_1D fft1d = new DoubleFFT_1D(BufferElements2Rec);
 
         double[] fftBuffer = new double[BufferElements2Rec * 2];
-        FileOutputStream os = null;
 
-        //get the path to sdcard
-        File pathToExternalStorage = Environment.getExternalStorageDirectory();
-        //to this path add a new directory path and create new App dir (InstroList) in /documents Dir
-        File appDirectory = new File(pathToExternalStorage.getAbsolutePath() + "/test2");
-        // have the object build the directory structure, if needed.
-        appDirectory.mkdirs();
-        String fileName = "test.txt";
-        File filePath = new File(appDirectory, fileName);
-        // Write the output audio in byte
-        //  String filePath = "/sdcard/8k16bitMono.pcm";
-
-        //short sData1[] = new short[BufferElements2Rec];
-        try {
-            os = new FileOutputStream(filePath);
-        } catch (FileNotFoundException e) {
-            Log.e("ERRR", "Could not create file", e);
-        }
         while (isRecording) {
+            //recording Audio data into sData
             recorder.read(sData, 0, BufferElements2Rec);
-
-            // hanningWindow()
+            /*
             for (int i = 0; i < BufferElements2Rec - 1; ++i) {
                 fftBuffer[2 * i] = sData[i];
                 fftBuffer[2 * i + 1] = 0;
             }
+            */
+            //perform a hamming window on the signal in order to filter noise
+            //  double[] a = new double[(BufferElements2Rec + 24 * BufferElements2Rec) * 2];
 
-            fft1d.complexForward(fftBuffer);
+            System.arraycopy(applyWindow(sData), 0, fftBuffer, 0, BufferElements2Rec);
+            //fft on audio
+            fft1d.realForward(fftBuffer);
 
+            /* find the peak magnitude and it's index */
+            double maxMag = Double.NEGATIVE_INFINITY;
+            int maxInd = -1;
+
+            for (int i = 0; i < fftBuffer.length / 2; ++i) {
+                double re = fftBuffer[2 * i];
+                double im = fftBuffer[2 * i + 1];
+                double mag = Math.sqrt(re * re + im * im);
+
+                if (mag > maxMag) {
+                    maxMag = mag;
+                    maxInd = i;
+                }
+            }
+
+              /* calculate the frequency */
+            double frequency = ((double) RECORDER_SAMPLERATE * maxInd / (BufferElements2Rec/ 2)/2);
+            Log.i("freq", String.valueOf(frequency) + "Hz");
+            /*
             double[] magnitude = new double[BufferElements2Rec / 2];
             maxVal = 0;
             for (int i = 0; i < (BufferElements2Rec / 2) - 1; ++i) {
@@ -123,11 +129,6 @@ public class Receiver {
                     if (magnitude[j] > maxVal) {
                         maxVal = (int) magnitude[j];
                         binNo = j;
-                        try {
-                            os.write((int)magnitude[j]);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                     }
                 }
 
@@ -139,35 +140,58 @@ public class Receiver {
 
             }
         }
-        try {
-            os.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        */
         }
     }
 
-    private byte[] short2byte(short[] sData) {
-        int shortArrsize = sData.length;
-        byte[] bytes = new byte[shortArrsize * 2];
+        private byte[] short2byte ( short[] sData){
+            int shortArrsize = sData.length;
+            byte[] bytes = new byte[shortArrsize * 2];
 
-        for (int i = 0; i < shortArrsize; i++) {
-            bytes[i * 2] = (byte) (sData[i] & 0x00FF);
-            bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
-            sData[i] = 0;
+            for (int i = 0; i < shortArrsize; i++) {
+                bytes[i * 2] = (byte) (sData[i] & 0x00FF);
+                bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
+                sData[i] = 0;
+            }
+            return bytes;
         }
-        return bytes;
+
+        public static byte[] toByteArray ( double[] doubleArray){
+            int times = Double.SIZE / Byte.SIZE;
+            byte[] bytes = new byte[doubleArray.length * times];
+            for (int i = 0; i < doubleArray.length; i++) {
+                ByteBuffer.wrap(bytes, i * times, times).putDouble(doubleArray[i]);
+            }
+            return bytes;
+        }
+
+    private void buildHammWindow(int size) {
+        if (window != null && window.length == size) {
+            return;
+        }
+        window = new double[size];
+        for (int i = 0; i < size; ++i) {
+            window[i] = .54 - .46 * Math.cos(2 * Math.PI * i / (size - 1.0));
+        }
     }
 
-    public static byte[] toByteArray(double[] doubleArray) {
-        int times = Double.SIZE / Byte.SIZE;
-        byte[] bytes = new byte[doubleArray.length * times];
-        for (int i = 0; i < doubleArray.length; i++) {
-            ByteBuffer.wrap(bytes, i * times, times).putDouble(doubleArray[i]);
+    /**
+     * apply a Hamming window filter to raw input data
+     *
+     * @param input an array containing unfiltered input data
+     * @return a double array containing the filtered data
+     */
+    private double[] applyWindow(short[] input) {
+        double[] res = new double[input.length];
+
+        buildHammWindow(input.length);
+        for (int i = 0; i < input.length; ++i) {
+            res[i] = (double) input[i] * window[i];
         }
-        return bytes;
+        return res;
     }
-
-
+}
+/*
     private void writeAudioDataToFile() {
 
         //get the path to sdcard
@@ -210,6 +234,5 @@ public class Receiver {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
-}
