@@ -48,8 +48,8 @@ public class Receiver {
 
             public void run() {
 
-                //performFFTonRecording();
-                writeAudioDataToFile();
+                performFFTonRecording();
+                //writeAudioDataToFile();
             }
         }, "AudioRecorder Thread");
         recordingThread.start();
@@ -76,13 +76,14 @@ public class Receiver {
         short sData[] = new short[BufferElements2Rec];
 
         DoubleFFT_1D fft1d = new DoubleFFT_1D(BufferElements2Rec);
+
         double[] fftBuffer = new double[BufferElements2Rec * 2];
         FileOutputStream os = null;
 
         //get the path to sdcard
         File pathToExternalStorage = Environment.getExternalStorageDirectory();
         //to this path add a new directory path and create new App dir (InstroList) in /documents Dir
-        File appDirectory = new File(pathToExternalStorage.getAbsolutePath() + "/teste/teste");
+        File appDirectory = new File(pathToExternalStorage.getAbsolutePath() + "/test2");
         // have the object build the directory structure, if needed.
         appDirectory.mkdirs();
         String fileName = "test.txt";
@@ -122,6 +123,11 @@ public class Receiver {
                     if (magnitude[j] > maxVal) {
                         maxVal = (int) magnitude[j];
                         binNo = j;
+                        try {
+                            os.write((int)magnitude[j]);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
 
@@ -131,14 +137,6 @@ public class Receiver {
                 Log.i("freq", "Bin " + String.valueOf(binNo));
                 Log.i("freq", String.valueOf(freq) + "Hz");
 
-
-                byte bData[] = toByteArray(fftBuffer);
-
-                try {
-                    os.write(bData, 0, BufferElements2Rec * BytesPerElement);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
         try {
