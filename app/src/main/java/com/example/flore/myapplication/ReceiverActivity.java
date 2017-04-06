@@ -51,7 +51,7 @@ public class ReceiverActivity extends AppCompatActivity {
                     break;
                 }
                 case R.id.btnVerifyFreq: {
-                    
+
                     frequencyV = Double.parseDouble(txtFreqV.getText().toString());
                     enableButtons(true);
                     verifStatus = myReceiver.verifyFreq(frequencyV);

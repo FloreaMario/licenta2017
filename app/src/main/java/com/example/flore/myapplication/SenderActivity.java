@@ -10,35 +10,75 @@ public class SenderActivity extends AppCompatActivity {
     Sender mySender = new Sender();
     EditText txtFreq, txtTime;
     Button btnEmit;
+    private boolean isEmitting = false;
     double frequency;
     int time;
-
+    private Thread transmittingThread = null;
     @Override
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sender);
         setButtonHandlers();
     }
+    private void enableButtons(boolean isRecording) {
+        enableButton(R.id.btnTransmit, isEmitting);
+        enableButton(R.id.btnStopTransm, !isEmitting);
+    }
+    private void enableButton(int id, boolean isEnable) {
+        ((Button) findViewById(id)).setEnabled(isEnable);
+    }
 
     private void setButtonHandlers() {
         ((Button) findViewById(R.id.btnEmit)).setOnClickListener(btnClick);
+        ((Button) findViewById(R.id.btnTransmit)).setOnClickListener(btnClick);
+        ((Button) findViewById(R.id.btnStopTransm)).setOnClickListener(btnClick);
     }
 
-    private View.OnClickListener btnClick = new View.OnClickListener() {
+    public View.OnClickListener btnClick = new View.OnClickListener() {
         public void onClick(View v) {
             final EditText txtFreq = (EditText)findViewById(R.id.txtFreqV);
             final EditText txtTime = (EditText)findViewById(R.id.txtTime);
             switch (v.getId()) {
 
                 case R.id.btnEmit: {
+
                     frequency = Double.parseDouble(txtFreq.getText().toString());
                     time = Integer.parseInt(txtTime.getText().toString());
                     mySender.playSound(frequency, time);
                     break;
                 }
+                case R.id.btnTransmit: {
+                    enableButtons(true);
+                    isEmitting = true;
+                    startEmit();
+                    break;
+                }
+                case R.id.btnStopTransm: {
+                    enableButtons(false);
+                    isEmitting = false;
+                    transmittingThread = null;
+                    break;
+                    }
+                }
 
             }
-        }
+
     };
+    private void startEmit()
+    {
+        transmittingThread = new Thread(new Runnable() {
+
+            public void run() {
+                while(isEmitting == true) {
+                    mySender.playSound(6969, 44100);
+                    mySender.playSound(6000, 44100);
+                    mySender.playSound(9000, 44100);
+                }
+            }
+        }, "Transmitting Thread ");
+        transmittingThread.start();
+
+    }
 }
