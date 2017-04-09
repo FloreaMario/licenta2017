@@ -29,13 +29,16 @@ public class Receiver {
     private Thread recordingThread = null;
     private boolean isRecording = false;
     private double[] window;
+    double var = 0;
+    double prevVar = 0;
+    int j = 0;
     int bufferSize = AudioRecord.getMinBufferSize(RECORDER_SAMPLERATE,
             RECORDER_CHANNELS, RECORDER_AUDIO_ENCODING);
 
     int BufferElements2Rec = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
     int BytesPerElement = 2; // 2 bytes in 16bit format
     double[] fftBuffer = new double[BufferElements2Rec * 2];
-
+    double[] assid = new double[BufferElements2Rec];
     //Methods
     public void startRecording() {
 
@@ -79,6 +82,7 @@ public class Receiver {
         short sData[] = new short[BufferElements2Rec];
 
         DoubleFFT_1D fft1d = new DoubleFFT_1D(BufferElements2Rec);
+        j = 0;
 
 
         while (isRecording) {
@@ -89,29 +93,82 @@ public class Receiver {
             //fft on audio
             fft1d.realForward(fftBuffer);
 
-            /* find the peak magnitude and it's index */
-            double maxMag = Double.NEGATIVE_INFINITY;
-            int maxInd = -1;
+            // the ui element will be updated with the assid
+            // getAssid();
+            }
+        }
 
-            for (int i = 0; i < fftBuffer.length / 2; ++i) {
-                double re = fftBuffer[2 * i];
-                double im = fftBuffer[2 * i + 1];
-                double mag = Math.sqrt(re * re + im * im);
-
-                if (mag > maxMag) {
-                    maxMag = mag;
-                    maxInd = i;
+    /**
+     * parse the fft buffer and check for existent frequencies
+     * push the frequencies into an array. This array will represent the ASSISD received
+     * @return
+     */
+    private double[] getAssid(void)
+    {
+        //parse the fft buffer and check for existent frequencies
+        for (int i = 0; i < fftBuffer.length / 2; ++i)
+        {
+            double varFFT = fftBuffer[i];
+            //if frequency is greater than a prefedined threshold
+            if(varFFT > 60000)
+            {
+                var = getFreqfromInd(i);
+                //if frequency is different from the previous stored frequency(with a threshold)
+                if(((var >= prevVar +50) || (var <= prevVar -50)) && (var!=0))
+                {
+                    //push the frequencies into an array. This array will represent the ASSISD received
+                    assid[j] = var / 2;
+                    prevVar = var;
+                    j++;
                 }
             }
-
-              /* calculate the frequency */
-            double frequency = ((double) RECORDER_SAMPLERATE * maxInd / (BufferElements2Rec/ 2)/2);
-            Log.i("freq", String.valueOf(frequency) + "Hz");
-
+            else
+            {
+                //do nothing
+            }
         }
+        return assid;
     }
 
-        private byte[] short2byte ( short[] sData){
+    /**
+     *  Function that returns the magnitude of the FFT buffer
+     * @return
+     */
+    private double returnMagnitude(void)
+    {
+       /* find the peak magnitude and it's index */
+       double maxMag = Double.NEGATIVE_INFINITY;
+       int maxInd = -1;
+       //calculate magnitude
+       for (int i = 0; i < fftBuffer.length / 2; ++i) {
+           double re = fftBuffer[2 * i];
+           double im = fftBuffer[2 * i + 1];
+           double mag = Math.sqrt(re * re + im * im);
+
+           if (mag > maxMag) {
+               maxMag = mag;
+               maxInd = i;
+           }
+
+       }
+       return maxInd;
+                /* calculate the frequency */
+        //double frequency = getFreqfromInd(maxInd);
+        //  Log.i("freq", String.valueOf(frequency) + "Hz");
+   }
+
+    /**
+     * Function that receives the ind and computes the frequency of it
+     * @param maxInd
+     * @return frequency
+     */
+    private double getFreqfromInd(int maxInd)
+    {
+        double frequency = ((double) RECORDER_SAMPLERATE * maxInd / (BufferElements2Rec/ 2)/2);
+        return frequency;
+    }
+
+    private byte[] short2byte ( short[] sData){
             int shortArrsize = sData.length;
             byte[] bytes = new byte[shortArrsize * 2];
 
@@ -123,7 +180,7 @@ public class Receiver {
             return bytes;
         }
 
-        public static byte[] toByteArray ( double[] doubleArray){
+    public static byte[] toByteArray ( double[] doubleArray){
             int times = Double.SIZE / Byte.SIZE;
             byte[] bytes = new byte[doubleArray.length * times];
             for (int i = 0; i < doubleArray.length; i++) {
