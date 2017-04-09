@@ -21,7 +21,6 @@ public class ReceiverActivity extends AppCompatActivity {
     private void setButtonHandlers() {
         ((Button)findViewById(R.id.btnStart)).setOnClickListener(btnClick);
         ((Button)findViewById(R.id.btnStop)).setOnClickListener(btnClick);
-        ((Button)findViewById(R.id.btnVerifyFreq)).setOnClickListener(btnClick);
     }
     private void enableButtons(boolean isRecording) {
         enableButton(R.id.btnStart, !isRecording);
@@ -33,39 +32,37 @@ public class ReceiverActivity extends AppCompatActivity {
 
     private View.OnClickListener btnClick = new View.OnClickListener() {
         public void onClick(View v) {
-            final EditText txtFreqV = (EditText)findViewById(R.id.txtFreqV);
-            TextView txtResult = (TextView)findViewById(R.id.txtResult);
 
+            TextView txtAssid = (TextView)findViewById(R.id.txtASSID);
 
-            boolean verifStatus ;
+            double[] assid;
+            String print = "";
             switch (v.getId()) {
 
                 case R.id.btnStart: {
                     enableButtons(true);
                     myReceiver.startRecording();
+                    print = "";
                     break;
                 }
                 case R.id.btnStop: {
                     enableButtons(false);
-                    myReceiver.stopRecording();
+                    assid = myReceiver.stopRecording();
+                    int[] assidInt = new int[assid.length];
+                    for(int i = 0; i< assid.length; i++)
+                    {
+
+                       assidInt[i] =(int)(assid[i] +0.5d);
+                        if(assidInt[i] != 0)
+                        {
+                            print += assidInt[i];
+                            print +=" ";
+                        }
+                    }
+                    txtAssid.setText(print);
                     break;
                 }
-                case R.id.btnVerifyFreq: {
 
-                    frequencyV = Double.parseDouble(txtFreqV.getText().toString());
-                    enableButtons(true);
-                    verifStatus = myReceiver.verifyFreq(frequencyV);
-                    if(verifStatus == true)
-                    {
-                        txtResult.setText("Frequency was detected");
-                    }
-                    else
-                    {
-                        txtResult.setText("Frequency was NOT detected");
-                    }
-
-                    break;
-                }
             }
         }
     };

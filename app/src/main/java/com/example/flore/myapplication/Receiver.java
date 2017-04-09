@@ -14,7 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
+import java.util.ArrayList;
 /**
  * Created by flore on 3/21/2017.
  */
@@ -48,7 +48,7 @@ public class Receiver {
 
         recorder.startRecording();
         isRecording = true;
-
+        assid = new double[BufferElements2Rec];
         recordingThread = new Thread(new Runnable() {
 
             public void run() {
@@ -61,18 +61,17 @@ public class Receiver {
     }
 
 
-    public void stopRecording() {
+    public double[] stopRecording() {
         // stops the recording activity
+
         if (null != recorder) {
             isRecording = false;
-
-
             recorder.stop();
             recorder.release();
-
             recorder = null;
             recordingThread = null;
         }
+        return assid;
     }
 
     private void performFFTonRecording() {
@@ -94,7 +93,7 @@ public class Receiver {
             fft1d.realForward(fftBuffer);
 
             // the ui element will be updated with the assid
-            // getAssid();
+             getAssid();
             }
         }
 
@@ -103,18 +102,18 @@ public class Receiver {
      * push the frequencies into an array. This array will represent the ASSISD received
      * @return
      */
-    private double[] getAssid(void)
+    private void getAssid()
     {
         //parse the fft buffer and check for existent frequencies
         for (int i = 0; i < fftBuffer.length / 2; ++i)
         {
             double varFFT = fftBuffer[i];
             //if frequency is greater than a prefedined threshold
-            if(varFFT > 60000)
+            if(varFFT > 100000)
             {
                 var = getFreqfromInd(i);
                 //if frequency is different from the previous stored frequency(with a threshold)
-                if(((var >= prevVar +50) || (var <= prevVar -50)) && (var!=0))
+                if(((var >= prevVar +100) || (var <= prevVar -100)) && (var!=0))
                 {
                     //push the frequencies into an array. This array will represent the ASSISD received
                     assid[j] = var / 2;
@@ -127,14 +126,13 @@ public class Receiver {
                 //do nothing
             }
         }
-        return assid;
     }
 
     /**
      *  Function that returns the magnitude of the FFT buffer
      * @return
      */
-    private double returnMagnitude(void)
+    private double returnMagnitude()
     {
        /* find the peak magnitude and it's index */
        double maxMag = Double.NEGATIVE_INFINITY;
