@@ -15,13 +15,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+
+import static java.lang.Math.sqrt;
+
 /**
  * Created by flore on 3/21/2017.
  */
 
 public class Receiver {
     //Variables
-    private static final int RECORDER_SAMPLERATE = 8000;
+    private static final int RECORDER_SAMPLERATE = 44100;
     private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
     private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
@@ -35,16 +38,21 @@ public class Receiver {
     int bufferSize = AudioRecord.getMinBufferSize(RECORDER_SAMPLERATE,
             RECORDER_CHANNELS, RECORDER_AUDIO_ENCODING);
 
-    int BufferElements2Rec = 1024; // want to play 2048 (2K) since 2 bytes we use only 1024
+    int BufferElements2Rec = bufferSize; // want to play 2048 (2K) since 2 bytes we use only 1024
     int BytesPerElement = 2; // 2 bytes in 16bit format
+    int prevVarFFT = 0;
     double[] fftBuffer = new double[BufferElements2Rec * 2];
     double[] assid = new double[BufferElements2Rec];
+    double[] real = new double[BufferElements2Rec];
+    double[] imag = new double[BufferElements2Rec];
+    double[] mag = new double[BufferElements2Rec];
+
     //Methods
     public void startRecording() {
 
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC,
                 RECORDER_SAMPLERATE, RECORDER_CHANNELS,
-                RECORDER_AUDIO_ENCODING, BufferElements2Rec * BytesPerElement);
+                RECORDER_AUDIO_ENCODING, bufferSize * 2);
 
         recorder.startRecording();
         isRecording = true;
@@ -88,14 +96,30 @@ public class Receiver {
             //recording Audio data into sData
             recorder.read(sData, 0, BufferElements2Rec);
 
-            System.arraycopy(applyWindow(sData), 0, fftBuffer, 0, BufferElements2Rec);
+           // System.arraycopy(applyWindow(sData), 0, fftBuffer, 0, BufferElements2Rec);
+           // System.arraycopy(double)sData, 0, fftBuffer, 0, BufferElements2Rec);
+            for(int i = 0; i<BufferElements2Rec ;i++)
+            {
+                fftBuffer[i] = (double)sData[i];
+            }
+
             //fft on audio
             fft1d.realForward(fftBuffer);
+            mag = new double[BufferElements2Rec];
+            for(int i = 0 ; i < BufferElements2Rec; i++)
+            {
+                real[i] = fftBuffer[2*i];
+                imag[i] = 0;
+                mag[i] = sqrt(real[i]*real[i]+imag[i]*imag[i]);
+            }
 
             // the ui element will be updated with the assid
-             getAssid();
-            }
+
+            //parse the fft buffer and check for existent frequencies
+
+            getAssid();
         }
+    }
 
     /**
      * parse the fft buffer and check for existent frequencies
@@ -105,11 +129,11 @@ public class Receiver {
     private void getAssid()
     {
         //parse the fft buffer and check for existent frequencies
-        for (int i = 0; i < fftBuffer.length / 2; ++i)
+        for (int i = 0; i < mag.length; ++i)
         {
-            double varFFT = fftBuffer[i];
+            double varFFT = mag[i];
             //if frequency is greater than a prefedined threshold
-            if(varFFT > 100000)
+            if((varFFT > 1500)&&(i>1000))
             {
                 var = getFreqfromInd(i);
                 //if frequency is different from the previous stored frequency(with a threshold)
@@ -141,7 +165,7 @@ public class Receiver {
        for (int i = 0; i < fftBuffer.length / 2; ++i) {
            double re = fftBuffer[2 * i];
            double im = fftBuffer[2 * i + 1];
-           double mag = Math.sqrt(re * re + im * im);
+           double mag = sqrt(re * re + im * im);
 
            if (mag > maxMag) {
                maxMag = mag;
