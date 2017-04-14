@@ -133,14 +133,14 @@ public class Receiver {
         {
             double varFFT = mag[i];
             //if frequency is greater than a prefedined threshold
-            if((varFFT > 1500)&&(i>1000))
+            if((varFFT > 720)&&(i>1300))
             {
                 var = getFreqfromInd(i);
                 //if frequency is different from the previous stored frequency(with a threshold)
-                if(((var >= prevVar +100) || (var <= prevVar -100)) && (var!=0))
+                if(((var >= prevVar +200) || (var <= prevVar -200)) && (var!=0))
                 {
                     //push the frequencies into an array. This array will represent the ASSISD received
-                    assid[j] = var / 2;
+                    assid[j] = var;
                     prevVar = var;
                     j++;
                 }
