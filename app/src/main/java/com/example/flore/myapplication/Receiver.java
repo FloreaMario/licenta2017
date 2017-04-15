@@ -32,8 +32,9 @@ public class Receiver {
     private Thread recordingThread = null;
     private boolean isRecording = false;
     private double[] window;
-    double var = 0;
-    double prevVar = 0;
+    double currentFreq = 0;
+    double prevFreq = 0;
+    double prevFreqValue = 17000;
     int j = 0;
     int bufferSize = AudioRecord.getMinBufferSize(RECORDER_SAMPLERATE,
             RECORDER_CHANNELS, RECORDER_AUDIO_ENCODING);
@@ -41,11 +42,21 @@ public class Receiver {
     int BufferElements2Rec = bufferSize; // want to play 2048 (2K) since 2 bytes we use only 1024
     int BytesPerElement = 2; // 2 bytes in 16bit format
     int prevVarFFT = 0;
+
     double[] fftBuffer = new double[BufferElements2Rec * 2];
     double[] assid = new double[BufferElements2Rec];
     double[] real = new double[BufferElements2Rec];
     double[] imag = new double[BufferElements2Rec];
     double[] mag = new double[BufferElements2Rec];
+
+    boolean commBit = false;//SOF and EOF bit
+
+    /****************DEFINES*************/
+    int MINIMBIN = 1300;
+    int SOFFREQ = 17000;
+    int THRESHOLDFREQ = 200;
+    int MAXFREQ = 700;
+
 
     //Methods
     public void startRecording() {
@@ -80,6 +91,7 @@ public class Receiver {
             recordingThread = null;
         }
         return assid;
+
     }
 
     private void performFFTonRecording() {
@@ -96,12 +108,7 @@ public class Receiver {
             //recording Audio data into sData
             recorder.read(sData, 0, BufferElements2Rec);
 
-           // System.arraycopy(applyWindow(sData), 0, fftBuffer, 0, BufferElements2Rec);
-           // System.arraycopy(double)sData, 0, fftBuffer, 0, BufferElements2Rec);
-            for(int i = 0; i<BufferElements2Rec ;i++)
-            {
-                fftBuffer[i] = (double)sData[i];
-            }
+           System.arraycopy(applyWindow(sData), 0, fftBuffer, 0, BufferElements2Rec);
 
             //fft on audio
             fft1d.realForward(fftBuffer);
@@ -116,7 +123,6 @@ public class Receiver {
             // the ui element will be updated with the assid
 
             //parse the fft buffer and check for existent frequencies
-
             getAssid();
         }
     }
@@ -131,17 +137,35 @@ public class Receiver {
         //parse the fft buffer and check for existent frequencies
         for (int i = 0; i < mag.length; ++i)
         {
-            double varFFT = mag[i];
+            double varMagnitude = mag[i];
             //if frequency is greater than a prefedined threshold
-            if((varFFT > 720)&&(i>1300))
+            if((varMagnitude > MAXFREQ)&&(i>MINIMBIN))
             {
-                var = getFreqfromInd(i);
+                //get frequency value
+                currentFreq = getFreqfromInd(i);
+                //17000 hz acts as Start of frame
+                if(((currentFreq <= prevFreqValue + THRESHOLDFREQ) || (currentFreq <= prevFreqValue -THRESHOLDFREQ))&&
+                        (currentFreq >= SOFFREQ - THRESHOLDFREQ) && (currentFreq <= SOFFREQ + THRESHOLDFREQ))
+                {
+                    if(commBit == true)
+                    {
+                        commBit = false;
+                    }
+                    else
+                    {
+                        commBit = true;
+                    }
+                    prevFreqValue = currentFreq;
+                }
+
                 //if frequency is different from the previous stored frequency(with a threshold)
-                if(((var >= prevVar +200) || (var <= prevVar -200)) && (var!=0))
+                //and commBit is set to true
+                if((commBit == true)&&(currentFreq!=0) && (currentFreq>(SOFFREQ+THRESHOLDFREQ))
+                        &&((currentFreq >= prevFreq +THRESHOLDFREQ) || (currentFreq <= prevFreq -THRESHOLDFREQ)))
                 {
                     //push the frequencies into an array. This array will represent the ASSISD received
-                    assid[j] = var;
-                    prevVar = var;
+                    assid[j] = currentFreq;
+                    prevFreq = currentFreq;
                     j++;
                 }
             }
@@ -153,33 +177,6 @@ public class Receiver {
     }
 
     /**
-     *  Function that returns the magnitude of the FFT buffer
-     * @return
-     */
-    private double returnMagnitude()
-    {
-       /* find the peak magnitude and it's index */
-       double maxMag = Double.NEGATIVE_INFINITY;
-       int maxInd = -1;
-       //calculate magnitude
-       for (int i = 0; i < fftBuffer.length / 2; ++i) {
-           double re = fftBuffer[2 * i];
-           double im = fftBuffer[2 * i + 1];
-           double mag = sqrt(re * re + im * im);
-
-           if (mag > maxMag) {
-               maxMag = mag;
-               maxInd = i;
-           }
-
-       }
-       return maxInd;
-                /* calculate the frequency */
-        //double frequency = getFreqfromInd(maxInd);
-        //  Log.i("freq", String.valueOf(frequency) + "Hz");
-   }
-
-    /**
      * Function that receives the ind and computes the frequency of it
      * @param maxInd
      * @return frequency
@@ -189,27 +186,6 @@ public class Receiver {
         double frequency = ((double) RECORDER_SAMPLERATE * maxInd / (BufferElements2Rec/ 2)/2);
         return frequency;
     }
-
-    private byte[] short2byte ( short[] sData){
-            int shortArrsize = sData.length;
-            byte[] bytes = new byte[shortArrsize * 2];
-
-            for (int i = 0; i < shortArrsize; i++) {
-                bytes[i * 2] = (byte) (sData[i] & 0x00FF);
-                bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
-                sData[i] = 0;
-            }
-            return bytes;
-        }
-
-    public static byte[] toByteArray ( double[] doubleArray){
-            int times = Double.SIZE / Byte.SIZE;
-            byte[] bytes = new byte[doubleArray.length * times];
-            for (int i = 0; i < doubleArray.length; i++) {
-                ByteBuffer.wrap(bytes, i * times, times).putDouble(doubleArray[i]);
-            }
-            return bytes;
-        }
 
     private void buildHammWindow(int size) {
         if (window != null && window.length == size) {
@@ -237,33 +213,4 @@ public class Receiver {
         return res;
     }
 
-    public boolean verifyFreq(double frequency)
-        {
-        /**
-         * Function receives as parameter a desired frequency. IT will check to see if
-         * the frequency is present in the audio environment, and reflect on the UI the changes
-         */
-        int maxInd = 0;
-        double fftValue;
-        double FFTTHRESHOLD = 50000;
-        double firstVal;
-        boolean returnVal;
-
-        //double frequency = ((double) RECORDER_SAMPLERATE * maxInd / (BufferElements2Rec/ 2)/2);
-
-        // get from the frequency the indicator where we could find it
-        firstVal = (2 * frequency * (BufferElements2Rec/ 2))/RECORDER_SAMPLERATE;
-        maxInd = (int)(firstVal + 0.5d);
-
-        fftValue = fftBuffer[maxInd * 2];
-        if(fftValue > FFTTHRESHOLD)
-        {
-            returnVal = true;
-        }
-        else
-        {
-            returnVal = false;
-        }
-        return returnVal;
-    }
 }

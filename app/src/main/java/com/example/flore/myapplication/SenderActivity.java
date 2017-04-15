@@ -72,9 +72,16 @@ public class SenderActivity extends AppCompatActivity {
 
             public void run() {
                 while(isEmitting == true) {
-                    mySender.playSound(6969, 44100);
-                    mySender.playSound(6000, 44100);
-                    mySender.playSound(9000, 44100);
+                   // mySender.playSound(6969, 44100);
+                    mySender.playSound(17000, 11100);//SOF
+                    mySender.playSound(18000, 11100);
+                    mySender.playSound(18500, 11100);
+                    mySender.playSound(19000, 11100);
+                    mySender.playSound(19500, 11100);
+                    mySender.playSound(20000, 11100);
+                    mySender.playSound(20500, 11100);
+                    mySender.playSound(21000, 11100);
+
                 }
             }
         }, "Transmitting Thread ");
