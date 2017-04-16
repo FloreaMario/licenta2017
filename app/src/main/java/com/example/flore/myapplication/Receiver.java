@@ -44,7 +44,7 @@ public class Receiver {
     int prevVarFFT = 0;
 
     double[] fftBuffer = new double[BufferElements2Rec * 2];
-    double[] assid = new double[BufferElements2Rec];
+    double[] assid = new double[20];
     double[] real = new double[BufferElements2Rec];
     double[] imag = new double[BufferElements2Rec];
     double[] mag = new double[BufferElements2Rec];
@@ -54,8 +54,8 @@ public class Receiver {
     /****************DEFINES*************/
     int MINIMBIN = 1300;
     int SOFFREQ = 17000;
-    int THRESHOLDFREQ = 200;
-    int MAXFREQ = 700;
+    int THRESHOLDFREQ = 100;
+    int MAXFREQ = 750;
 
 
     //Methods
@@ -82,7 +82,7 @@ public class Receiver {
 
     public double[] stopRecording() {
         // stops the recording activity
-
+        commBit = false;
         if (null != recorder) {
             isRecording = false;
             recorder.stop();
@@ -144,7 +144,7 @@ public class Receiver {
                 //get frequency value
                 currentFreq = getFreqfromInd(i);
                 //17000 hz acts as Start of frame
-                if(((currentFreq <= prevFreqValue + THRESHOLDFREQ) || (currentFreq <= prevFreqValue -THRESHOLDFREQ))&&
+                if(((currentFreq <= prevFreqValue + 20) && (currentFreq >= prevFreqValue -20))&&
                         (currentFreq >= SOFFREQ - THRESHOLDFREQ) && (currentFreq <= SOFFREQ + THRESHOLDFREQ))
                 {
                     if(commBit == true)
@@ -160,13 +160,16 @@ public class Receiver {
 
                 //if frequency is different from the previous stored frequency(with a threshold)
                 //and commBit is set to true
-                if((commBit == true)&&(currentFreq!=0) && (currentFreq>(SOFFREQ+THRESHOLDFREQ))
-                        &&((currentFreq >= prevFreq +THRESHOLDFREQ) || (currentFreq <= prevFreq -THRESHOLDFREQ)))
+                if((commBit == true) && (currentFreq!=0) && (currentFreq >= (SOFFREQ+THRESHOLDFREQ))
+                        &&((currentFreq >= prevFreq + THRESHOLDFREQ) || (currentFreq <= prevFreq - THRESHOLDFREQ)))
                 {
+
                     //push the frequencies into an array. This array will represent the ASSISD received
                     assid[j] = currentFreq;
                     prevFreq = currentFreq;
+
                     j++;
+                    performAvg(assid[j]);
                 }
             }
             else
@@ -174,6 +177,41 @@ public class Receiver {
                 //do nothing
             }
         }
+    }
+    public double[] performAvg(double[] var)
+    {
+        double[] firstValue = new double[20];
+        double[] secondValue = new double[20];
+        double[] thirdValue = new double[20];
+        double[] returnValue = new double[20];
+        int counter = 0;
+
+        counter++;
+        switch(counter)
+        {
+            case 1:
+                firstValue = var;
+                break;
+            case 2:
+                secondValue = var;
+                break;
+            case 3:
+                thirdValue = var;
+                break;
+        }
+            if((firstValue.length > secondValue.length) &&(firstValue.length > thirdValue.length) )
+            {
+                returnValue = firstValue;
+            }
+            if((secondValue.length > firstValue.length) &&(secondValue.length > thirdValue.length) )
+            {
+                returnValue = secondValue;
+            }
+            if((thirdValue.length > firstValue.length) &&(thirdValue.length > secondValue.length) )
+            {
+                returnValue = thirdValue;
+            }
+            return returnValue;
     }
 
     /**

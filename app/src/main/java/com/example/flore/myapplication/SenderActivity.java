@@ -74,13 +74,13 @@ public class SenderActivity extends AppCompatActivity {
                 while(isEmitting == true) {
                    // mySender.playSound(6969, 44100);
                     mySender.playSound(17000, 11100);//SOF
-                    mySender.playSound(18000, 11100);
-                    mySender.playSound(18500, 11100);
-                    mySender.playSound(19000, 11100);
-                    mySender.playSound(19500, 11100);
-                    mySender.playSound(20000, 11100);
-                    mySender.playSound(20500, 11100);
-                    mySender.playSound(21000, 11100);
+                    mySender.playSound(18000, 22100);
+                    mySender.playSound(18100, 22100);
+                    mySender.playSound(18250, 22100);
+                    mySender.playSound(19500, 22100);
+                    mySender.playSound(20000, 22100);
+                    mySender.playSound(20500, 22100);
+                    mySender.playSound(21000, 22100);
 
                 }
             }
