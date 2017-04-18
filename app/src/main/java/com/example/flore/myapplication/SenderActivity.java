@@ -73,14 +73,51 @@ public class SenderActivity extends AppCompatActivity {
             public void run() {
                 while(isEmitting == true) {
                    // mySender.playSound(6969, 44100);
-                    mySender.playSound(17000, 11100);//SOF
-                    mySender.playSound(18000, 22100);
-                    mySender.playSound(18100, 22100);
-                    mySender.playSound(18250, 22100);
-                    mySender.playSound(19500, 22100);
-                    mySender.playSound(20000, 22100);
-                    mySender.playSound(20500, 22100);
-                    mySender.playSound(21000, 22100);
+                    /*
+                    mySender.playSound(17000, 5500);//SOF
+                    mySender.playSound(18000, 5500);
+                    mySender.playSound(18100, 5500);
+                    mySender.playSound(18200, 5500);
+                    mySender.playSound(18300, 5500);
+                    mySender.playSound(18400, 5500);
+                    mySender.playSound(18500, 5500);
+                    mySender.playSound(18600, 5500);
+                    mySender.playSound(18700, 5500);
+                    mySender.playSound(18800, 5500);
+                    mySender.playSound(18900, 5500);
+                    mySender.playSound(19000, 5500);
+                    mySender.playSound(19100, 5500);
+                    mySender.playSound(19200, 5500);
+                    mySender.playSound(19300, 5500);
+                    mySender.playSound(19400, 5500);
+                    mySender.playSound(19500, 5500);
+                    mySender.playSound(19600, 5500);
+                    mySender.playSound(19700, 5500);
+                    mySender.playSound(19800, 5500);
+                    mySender.playSound(19900, 5500);
+                    mySender.playSound(20000, 5500);
+                    mySender.playSound(20100, 5500);
+                    mySender.playSound(20200, 5500);
+                    mySender.playSound(20300, 5500);
+                    mySender.playSound(20400, 5500);
+                    mySender.playSound(20500, 5500);
+                    mySender.playSound(20600, 5500);
+                    mySender.playSound(20700, 5500);
+                    mySender.playSound(20800, 5500);
+                    mySender.playSound(20900, 5500);
+                    mySender.playSound(21000, 5500);
+                    mySender.playSound(21100, 5500);
+                    mySender.playSound(21200, 5500);
+                    mySender.playSound(21300, 5500);
+                    mySender.playSound(21400, 5500);
+                    mySender.playSound(21500, 5500);
+*/
+                    mySender.playSound(17000, 11000);//SOF
+                    mySender.playSound(18700, 11000);
+                    mySender.playSound(19600, 11000);
+                    mySender.playSound(20000, 11000);
+                    mySender.playSound(20100, 11000);
+
 
                 }
             }

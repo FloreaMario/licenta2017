@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 import static java.lang.Math.sqrt;
 
@@ -23,6 +24,8 @@ import static java.lang.Math.sqrt;
  */
 
 public class Receiver {
+    Vocabulary myVocab = new Vocabulary();
+
     //Variables
     private static final int RECORDER_SAMPLERATE = 44100;
     private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
@@ -44,19 +47,23 @@ public class Receiver {
     int prevVarFFT = 0;
 
     double[] fftBuffer = new double[BufferElements2Rec * 2];
-    double[] assid = new double[20];
+    double[] assid = new double[100];
     double[] real = new double[BufferElements2Rec];
     double[] imag = new double[BufferElements2Rec];
     double[] mag = new double[BufferElements2Rec];
+    double[] assid1 = new double[100];
+    double[] assid2 = new double[100];
+    double[] assid3 = new double[100];
 
     boolean commBit = false;//SOF and EOF bit
+    boolean commFrame = true;
 
     /****************DEFINES*************/
     int MINIMBIN = 1300;
     int SOFFREQ = 17000;
     int THRESHOLDFREQ = 100;
-    int MAXFREQ = 750;
-
+    int MAXFREQ = 700;
+    int counter = 0;
 
     //Methods
     public void startRecording() {
@@ -67,7 +74,7 @@ public class Receiver {
 
         recorder.startRecording();
         isRecording = true;
-        assid = new double[BufferElements2Rec];
+        assid = new double[100];
         recordingThread = new Thread(new Runnable() {
 
             public void run() {
@@ -82,7 +89,12 @@ public class Receiver {
 
     public double[] stopRecording() {
         // stops the recording activity
+
+        char[] stringTable1= new char[100];
+        char[] stringTable2= new char[100];
+        char[] stringTable3= new char[100];
         commBit = false;
+        counter = 0;
         if (null != recorder) {
             isRecording = false;
             recorder.stop();
@@ -90,6 +102,14 @@ public class Receiver {
             recorder = null;
             recordingThread = null;
         }
+
+        //assid = performAvg(assid1, assid2, assid3);
+        char[] myCharFinal = new char[100];
+        myCharFinal = myVocab.masterConvert(assid1,assid2,assid3);
+
+        assid1 = new double[100];
+        assid2 = new double[100];
+        assid3 = new double[100];
         return assid;
 
     }
@@ -134,27 +154,49 @@ public class Receiver {
      */
     private void getAssid()
     {
+
+
         //parse the fft buffer and check for existent frequencies
         for (int i = 0; i < mag.length; ++i)
         {
             double varMagnitude = mag[i];
             //if frequency is greater than a prefedined threshold
+            if((i>MINIMBIN) && (i < MINIMBIN + 297))
+            {
+                MAXFREQ = 500;
+            }
+            else
+            {
+                MAXFREQ = 300;
+            }
             if((varMagnitude > MAXFREQ)&&(i>MINIMBIN))
             {
                 //get frequency value
                 currentFreq = getFreqfromInd(i);
                 //17000 hz acts as Start of frame
-                if(((currentFreq <= prevFreqValue + 20) && (currentFreq >= prevFreqValue -20))&&
+                if((commFrame == true) &&
                         (currentFreq >= SOFFREQ - THRESHOLDFREQ) && (currentFreq <= SOFFREQ + THRESHOLDFREQ))
                 {
-                    if(commBit == true)
-                    {
-                        commBit = false;
+                    commBit = true;
+
+                    commFrame = false;
+                    switch (counter) {
+                        case 1:
+                            assid1 = assid;
+                            break;
+                        case 2:
+                            assid2 = assid;
+                            break;
+                        case 3:
+                            assid3 = assid;
+                            break;
+                        default:
+                            counter = 0;
+                            break;
                     }
-                    else
-                    {
-                        commBit = true;
-                    }
+                    counter++;
+                    assid = new double[100];
+                    j = 0;
                     prevFreqValue = currentFreq;
                 }
 
@@ -163,14 +205,14 @@ public class Receiver {
                 if((commBit == true) && (currentFreq!=0) && (currentFreq >= (SOFFREQ+THRESHOLDFREQ))
                         &&((currentFreq >= prevFreq + THRESHOLDFREQ) || (currentFreq <= prevFreq - THRESHOLDFREQ)))
                 {
-
+                    commFrame = true;
                     //push the frequencies into an array. This array will represent the ASSISD received
                     assid[j] = currentFreq;
                     prevFreq = currentFreq;
 
                     j++;
-                    performAvg(assid[j]);
                 }
+
             }
             else
             {
@@ -178,36 +220,28 @@ public class Receiver {
             }
         }
     }
-    public double[] performAvg(double[] var)
+    public double[] performAvg(double firstValue[], double secondValue[], double thirdValue[])
     {
-        double[] firstValue = new double[20];
-        double[] secondValue = new double[20];
-        double[] thirdValue = new double[20];
-        double[] returnValue = new double[20];
-        int counter = 0;
 
-        counter++;
-        switch(counter)
-        {
-            case 1:
-                firstValue = var;
-                break;
-            case 2:
-                secondValue = var;
-                break;
-            case 3:
-                thirdValue = var;
-                break;
-        }
-            if((firstValue.length > secondValue.length) &&(firstValue.length > thirdValue.length) )
+        double[] returnValue = new double[100];
+            int sum1 = 0;
+            int sum2 = 0;
+            int sum3 = 0;
+            for(double i : firstValue)
+              sum1 +=i;
+            for(double i : secondValue)
+               sum2 +=i;
+            for(double i : thirdValue)
+              sum3 +=i;
+            if((sum1> sum2) &&(sum1> sum3))
             {
                 returnValue = firstValue;
             }
-            if((secondValue.length > firstValue.length) &&(secondValue.length > thirdValue.length) )
+            if((sum2 > sum1) &&(sum2> sum3))
             {
                 returnValue = secondValue;
             }
-            if((thirdValue.length > firstValue.length) &&(thirdValue.length > secondValue.length) )
+            if((sum3 > sum1) &&(sum3 > sum2))
             {
                 returnValue = thirdValue;
             }
