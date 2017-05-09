@@ -67,23 +67,7 @@ public class Receiver {
     int counter = 0;
 
     //Methods
-    Activity activity;
-    public MyAndroidThread(Activity activity)
-    {
-        this.activity = activity;
-    }
-    @Override
-    public void run()
-    {
-        activity.runOnUiThread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                AndroidBasicThreadActivity.textView.setText("Hello!! Android Team :-) From child thread.");
-            }
-        });
-    }
+
 
 
     public void startRecording() {
@@ -183,11 +167,11 @@ public class Receiver {
             //if frequency is greater than a prefedined threshold
             if((i>MINIMBIN) && (i < MINIMBIN + 297))
             {
-                MAXFREQ = 800;
+                MAXFREQ = 250;
             }
             else
             {
-                MAXFREQ = 500;
+                MAXFREQ = 300;
             }
             if((varMagnitude > MAXFREQ)&&(i>MINIMBIN))
             {
