@@ -105,6 +105,7 @@ public class Receiver {
         char[] stringTable3= new char[100];
         commBit = false;
         counter = 0;
+        assidText = new char[20];
         if (null != recorder) {
             isRecording = false;
             recorder.stop();

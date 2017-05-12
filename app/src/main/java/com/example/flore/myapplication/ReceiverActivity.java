@@ -43,7 +43,7 @@ public class ReceiverActivity extends AppCompatActivity {
     private View.OnClickListener btnClick = new View.OnClickListener() {
         public void onClick(View v) {
 
-            TextView txtAssid = (TextView) findViewById(R.id.txtASSID);
+
 
             double[] assid;
             String print = "";
@@ -54,7 +54,7 @@ public class ReceiverActivity extends AppCompatActivity {
                     myReceiver.startRecording();
                     isRecording = true;
                     print =  startReceive();
-                    txtAssid.setText(print);
+                  //  txtAssid.setText(print);
 
                     break;
                 }
@@ -63,7 +63,7 @@ public class ReceiverActivity extends AppCompatActivity {
                     enableButtons(false);
                     assid = myReceiver.stopRecording();
                     print = "";
-                    txtAssid.setText(print);
+                 //   txtAssid.setText(print);
 
                     break;
                 }
@@ -87,9 +87,16 @@ public class ReceiverActivity extends AppCompatActivity {
                                 print += " ";
                             }
                         }
-
+                        //txtAssid.setText(print);
                         oldAssid = assidText;
-
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                TextView txtAssid = (TextView) findViewById(R.id.txtASSID);
+                                txtAssid.setText(print);
+                                print = new String();
+                            }
+                        });
 
                     }
                 }
