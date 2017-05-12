@@ -10,6 +10,8 @@ import android.media.AudioTrack;
 
 public class Sender {
 
+    private Thread transmittingThread = null;
+     volatile boolean isEmitting = false;
     public void playSound(double frequency, int duration) {
         // AudioTrack definition
         int mBufferSize = AudioTrack.getMinBufferSize(44100,
@@ -34,6 +36,39 @@ public class Sender {
         mAudioTrack.write(mBuffer, 0, mSound.length);
         mAudioTrack.stop();
         mAudioTrack.release();
+
+    }
+    public void stopEmission()
+    {
+        isEmitting = false;
+        transmittingThread = null;
+    }
+
+    public void startEmit(final int[] inputFreq)
+    {
+        isEmitting = true;
+        transmittingThread = new Thread(new Runnable() {
+
+            public void run() {
+
+
+                    while(isEmitting == true) {
+                        //play SOF
+                        playSound(17000, 11000);
+                        for(int i=0; i< inputFreq.length; i++)
+                        {
+                            if(inputFreq[i]!= 0)
+                            {
+                                playSound(inputFreq[i], 11000);
+                            }
+
+                        }
+
+                    }
+
+            }
+        }, "Transmitting Thread ");
+        transmittingThread.start();
 
     }
 }

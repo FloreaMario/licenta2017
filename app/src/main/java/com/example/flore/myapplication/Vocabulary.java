@@ -31,6 +31,8 @@ public class Vocabulary {
     n = 19500
 
      */
+
+    Sender mySender = new Sender();
     public char[] concat(char[] a, char[] b) {
         int aLen = a.length;
         int bLen = b.length;
@@ -155,5 +157,28 @@ public class Vocabulary {
             }
         }
         return myChar;
+    }
+
+    public int convertToFreq(char inputString)
+    {
+        int outputFreq = 0;
+        for(int i = 0; i < stringTable.length; i++)
+        {
+            if((inputString == stringTable[i]) && (inputString != 0))
+            {
+                outputFreq = freqTable[i];
+            }
+        }
+        return outputFreq;
+   }
+
+    public void frequencyConvert(char[] inputString)
+    {
+        int[] myfreq = new int[20];
+        for(int i = 0; i < inputString.length;i++)
+        {
+           myfreq[i] = convertToFreq(inputString[i]);
+        }
+        mySender.startEmit(myfreq);
     }
 }
