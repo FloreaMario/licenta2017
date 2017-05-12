@@ -58,6 +58,8 @@ public class Receiver {
 
     boolean commBit = false;//SOF and EOF bit
     boolean commFrame = true;
+    boolean check = false;
+    boolean boSize = false;
 
     /****************DEFINES*************/
     int MINIMBIN = 1300;
@@ -65,10 +67,14 @@ public class Receiver {
     int THRESHOLDFREQ = 100;
     int MAXFREQ = 700;
     int counter = 0;
+    char[] assidText = new char[20];
 
     //Methods
 
-
+    public char[] getASSIDtext()
+    {
+        return assidText;
+    }
 
     public void startRecording() {
 
@@ -109,7 +115,7 @@ public class Receiver {
 
         //assid = performAvg(assid1, assid2, assid3);
         char[] myCharFinal = new char[100];
-        myCharFinal = myVocab.masterConvert(assid1,assid2,assid3);
+     //   myCharFinal = myVocab.masterConvert(assid1,assid2,assid3);
 
         assid1 = new double[100];
         assid2 = new double[100];
@@ -148,6 +154,31 @@ public class Receiver {
 
             //parse the fft buffer and check for existent frequencies
             getAssid();
+            boSize = false;
+            check = false;
+            for(int i = 0; i<20; i++)
+            {
+                if((assid1[i] != 0) || (assid2[i] != 0))
+                {
+                    check = true;
+                }
+
+            }
+            if(check == true){
+                boSize = myVocab.checkSize(assid1, assid2);
+                if(boSize == true)
+                {
+                    assidText = myVocab.masterConvert(assid1, assid2);
+                    assid1 = new double[100];
+                    assid2 = new double[100];
+
+                }
+                else
+                {
+
+                }
+            }
+
         }
     }
 
@@ -158,22 +189,28 @@ public class Receiver {
      */
     private void getAssid()
     {
+        double avgFreq = 0;
+        double sum = 0;
+        int counterBin = 0;
+        for(int i = MINIMBIN; i < mag.length; ++i)
+        {
+            if(mag[i]!=0)
+            {
+                sum = sum + mag[i];
+                counterBin++;
+            }
 
+        }
+        avgFreq = sum / counterBin;
+        MAXFREQ = (int)avgFreq + 1000;
 
         //parse the fft buffer and check for existent frequencies
-        for (int i = 0; i < mag.length; ++i)
+        for (int i = MINIMBIN; i < mag.length; ++i)
         {
             double varMagnitude = mag[i];
             //if frequency is greater than a prefedined threshold
-            if((i>MINIMBIN) && (i < MINIMBIN + 297))
-            {
-                MAXFREQ = 250;
-            }
-            else
-            {
-                MAXFREQ = 300;
-            }
-            if((varMagnitude > MAXFREQ)&&(i>MINIMBIN))
+
+            if(varMagnitude > MAXFREQ)
             {
                 //get frequency value
                 currentFreq = getFreqfromInd(i);

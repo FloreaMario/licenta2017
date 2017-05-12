@@ -11,7 +11,11 @@ import android.widget.TextView;
 public class ReceiverActivity extends AppCompatActivity {
 
     Receiver myReceiver = new Receiver();
-    double frequencyV;
+    double frequencyV;char[] assidText;
+    char[] oldAssid;
+    String print = " ";
+    private Thread receiverThread = null;
+    private boolean isRecording = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +28,7 @@ public class ReceiverActivity extends AppCompatActivity {
     private void setButtonHandlers() {
         ((Button) findViewById(R.id.btnStart)).setOnClickListener(btnClick);
         ((Button) findViewById(R.id.btnStop)).setOnClickListener(btnClick);
+
     }
 
     private void enableButtons(boolean isRecording) {
@@ -47,27 +52,51 @@ public class ReceiverActivity extends AppCompatActivity {
                 case R.id.btnStart: {
                     enableButtons(true);
                     myReceiver.startRecording();
-                    print = "";
+                    isRecording = true;
+                    print =  startReceive();
+                    txtAssid.setText(print);
+
                     break;
                 }
                 case R.id.btnStop: {
+                    isRecording = false;
                     enableButtons(false);
                     assid = myReceiver.stopRecording();
-                    int[] assidInt = new int[assid.length];
-                    for (int i = 0; i < assid.length; i++) {
-
-                        assidInt[i] = (int) (assid[i] + 0.5d);
-                        if (assidInt[i] != 0) {
-                            print += assidInt[i];
-                            print += " ";
-                        }
-                    }
+                    print = "";
                     txtAssid.setText(print);
+
                     break;
                 }
 
             }
         }
     };
-    
+    private String startReceive()
+    {
+        receiverThread = new Thread(new Runnable() {
+
+            public void run() {
+                while(isRecording == true) {
+
+                    assidText = myReceiver.getASSIDtext();
+                    if (assidText != oldAssid) {
+                        for (int i = 0; i < assidText.length; i++) {
+
+                            if (assidText[i] != 0) {
+                                print += assidText[i];
+                                print += " ";
+                            }
+                        }
+
+                        oldAssid = assidText;
+
+
+                    }
+                }
+            }
+        }, "Transmitting Thread ");
+        receiverThread.start();
+        return print;
+    }
+
 }

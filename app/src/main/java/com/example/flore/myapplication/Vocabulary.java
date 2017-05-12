@@ -68,152 +68,64 @@ public class Vocabulary {
         return uniqueArray;
     }
 
-     public char[] commonElem(char[] array1, char[] array2) {
-         char[] arrayFinal = new char[100];
-         for (int i = 0; i < array1.length; i++) {
-             for (int j = 0; j < array2.length; j++) {
-                 if (array1[i] == array2[j]) {
-                     arrayFinal[i] = array1[i];
-                 }
-             }
-
-         }
-         return arrayFinal;
-     }
-
-    public char[] masterConvert(double assid1[], double assid2[],double assid3[])
-         {
-             char[] myChar1 = new char[100];
-             char[] myChar2 = new char[100];
-             char[] myChar3 = new char[100];
-
-             char[] myCharFirst = new char[100];
-             char[] myCharSecond = new char[100];
-             char[] myCharFinal = new char[100];
-
-             char[] myLongestChar = new char[100];
-             char[] mySecLongChar = new char[100];
-             char[] myThirdLongChar = new char[100];
-
-             myChar1 = vocabularyConvert(assid1);
-             myChar2 = vocabularyConvert(assid2);
-             myChar3 = vocabularyConvert(assid3);
-
-        int sum1 = 0;
-        int sum2 = 0;
-        int sum3 = 0;
-        for(double i : assid1)
-            sum1 +=i;
-        for(double i : assid2)
-            sum2 +=i;
-        for(double i : assid3)
-            sum3 +=i;
-        if((sum1> sum2) &&(sum1> sum3))
-        {
-            myLongestChar = myChar1;
-            if(sum2 > sum3)
-            {
-                mySecLongChar = myChar2;
-                myThirdLongChar = myChar3;
+    public char[] commonElem(char[] array1, char[] array2) {
+        char[] arrayFinal = new char[100];
+        for (int i = 0; i < array1.length; i++) {
+            for (int j = 0; j < array2.length; j++) {
+                if (array1[i] == array2[j]) {
+                    arrayFinal[i] = array1[i];
+                }
             }
-            else
-            {
-                mySecLongChar = myChar3;
-                myThirdLongChar = myChar2;
-            }
+
         }
-        if((sum2 > sum1) &&(sum2> sum3))
+        return arrayFinal;
+    }
+
+    public char[] masterConvert(double assid1[], double assid2[])
+    {
+        char[] myChar1 = new char[100];
+        char[] myChar2 = new char[100];
+
+        char[] myCharFinal = new char[100];
+
+        myChar1 = vocabularyConvert(assid1);
+        myChar2 = vocabularyConvert(assid2);
+
+        myCharFinal = commonElem(myChar1, myChar2);
+
+
+
+        return myCharFinal;
+    }
+    public boolean checkSize(double[] assid1, double[] assid2)
+    {
+        int size1 =0;
+        int size2 =0;
+        int i = 0;
+        boolean boResult = false;
+        while(assid1[i]!=0)
         {
-            myLongestChar = myChar2;
-            if(sum1 > sum3)
-            {
-                mySecLongChar = myChar1;
-                myThirdLongChar = myChar3;
-            }
-            else
-            {
-                mySecLongChar = myChar3;
-                myThirdLongChar = myChar1;
-            }
+            i++;
+            size1++;
         }
-        if((sum3 > sum1) &&(sum3 > sum2))
+        i=0;
+        while(assid2[i]!=0)
         {
-            myLongestChar = myChar3;
-            if(sum1 >sum2)
-            {
-                mySecLongChar = myChar1;
-                myThirdLongChar = myChar2;
-            }
-            else
-            {
-                mySecLongChar = myChar2;
-                myThirdLongChar = myChar1;
-            }
+            i++;
+            size2++;
+        }
+        if(size1 == size2)
+        {
+            boResult = true;
+        }
+        else
+        {
+            boResult = false;
         }
 
-             char[] char31 = new char[100];
-             char[] char32 = new char[100];
-             char[] char13 = new char[100];
-             char[] char12 = new char[100];
-             char[] char21 = new char[100];
-             char[] char23 = new char[100];
+        return boResult;
+    }
 
-
-             char31 = commonElem(myThirdLongChar, myLongestChar);
-             char32 = commonElem(myThirdLongChar, mySecLongChar);
-
-             char13 = commonElem(myLongestChar, myThirdLongChar);
-             char12 = commonElem(myLongestChar, mySecLongChar);
-
-             char23 = commonElem(mySecLongChar, myThirdLongChar);
-             char21 = commonElem(mySecLongChar, myLongestChar);
-
-             int size1 =0;
-             int size2 =0;
-             int size3 =0;
-             int i = 0;
-             while(myChar1[i]!=0)
-             {
-                 i++;
-                 size1++;
-             }
-             i=0;
-             while(myChar2[i]!=0)
-             {
-                 i++;
-                 size2++;
-             }
-             i=0;
-             while(myChar3[i]!=0)
-             {
-                 i++;
-                 size3++;
-             }
-             char[] mycharFinal1 = new char[100];
-             char[] mycharFinal2 = new char[100];
-             char[] mycharFinal3 = new char[100];
-
-             if(size1 == size2)
-             {
-                 mycharFinal1 = commonElem(myChar1, myChar2);
-             }
-             if(size2 == size3)
-             {
-                 mycharFinal2 = commonElem(myChar2, myChar3);
-             }
-             if(size1 == size3)
-             {
-                 mycharFinal3 = commonElem(myChar1, myChar3);
-             }
-
-             /*
-        myCharFirst = concat(myChar1, myChar2);
-        myCharSecond = concat(myCharFirst, otherChar2);
-        myCharFinal = toUniqueArray(myCharSecond);
-        */
-
-             return myCharFinal;
-         }
     public char[] vocabularyConvert(double assid[])
     {
         double[] intPart = new double[100];

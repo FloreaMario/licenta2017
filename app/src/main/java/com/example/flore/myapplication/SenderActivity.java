@@ -112,11 +112,11 @@ public class SenderActivity extends AppCompatActivity {
                     mySender.playSound(21400, 5500);
                     mySender.playSound(21500, 5500);
 */
-                    mySender.playSound(17000, 11000);//SOF
-                    mySender.playSound(18700, 11000);
-                    mySender.playSound(19600, 11000);
-                    mySender.playSound(20000, 11000);
-                    mySender.playSound(20100, 11000);
+                    mySender.playSound(17000, 22000);//SOF
+                    mySender.playSound(18700, 22000);
+                    mySender.playSound(19600, 22000);
+                    mySender.playSound(20000, 22000);
+                    mySender.playSound(20100, 22000);
 
 
                 }
