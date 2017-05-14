@@ -179,6 +179,7 @@ public class Vocabulary {
         {
            myfreq[i] = convertToFreq(inputString[i]);
         }
+        mySender.emitFlag();
         mySender.startEmit(myfreq);
     }
 }

@@ -10,7 +10,6 @@ public class SenderActivity extends AppCompatActivity {
     Sender mySender = new Sender();
     Vocabulary myVocab = new Vocabulary();
     EditText txtFreq, txtTime;
-    Button btnEmit;
     private boolean isEmitting = false;
 
     String frequency;
@@ -34,7 +33,6 @@ public class SenderActivity extends AppCompatActivity {
     }
 
     private void setButtonHandlers() {
-        ((Button) findViewById(R.id.btnEmit)).setOnClickListener(btnClick);
         ((Button) findViewById(R.id.btnTransmit)).setOnClickListener(btnClick);
         ((Button) findViewById(R.id.btnStopTransm)).setOnClickListener(btnClick);
     }
@@ -46,13 +44,6 @@ public class SenderActivity extends AppCompatActivity {
          //   final EditText txtTime = (EditText)findViewById(R.id.txtTime);
             switch (v.getId()) {
 
-                case R.id.btnEmit: {
-
-                    frequency = txtFreq.getText().toString();
-                    time = Integer.parseInt(txtTime.getText().toString());
-                   // mySender.playSound(frequency, time);
-                    break;
-                }
                 case R.id.btnTransmit: {
                     enableButtons(true);
                     isEmitting = true;
