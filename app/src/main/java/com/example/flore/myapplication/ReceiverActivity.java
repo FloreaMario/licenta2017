@@ -1,5 +1,8 @@
 package com.example.flore.myapplication;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,7 +19,7 @@ public class ReceiverActivity extends AppCompatActivity {
     String print = " ";
     private Thread receiverThread = null;
     private boolean isRecording = false;
-
+    String clipPrint = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,13 +50,15 @@ public class ReceiverActivity extends AppCompatActivity {
 
             double[] assid;
             String print = "";
+
             switch (v.getId()) {
 
                 case R.id.btnStart: {
                     enableButtons(true);
                     myReceiver.startRecording();
                     isRecording = true;
-                    print =  startReceive();
+                    print = startReceive();
+
                   //  txtAssid.setText(print);
 
                     break;
@@ -62,9 +67,10 @@ public class ReceiverActivity extends AppCompatActivity {
                     isRecording = false;
                     enableButtons(false);
                     assid = myReceiver.stopRecording();
-                    print = "";
                  //   txtAssid.setText(print);
-
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("Copied password", clipPrint);
+                    clipboard.setPrimaryClip(clip);
                     break;
                 }
 
@@ -73,6 +79,7 @@ public class ReceiverActivity extends AppCompatActivity {
     };
     private String startReceive()
     {
+
         receiverThread = new Thread(new Runnable() {
 
             public void run() {
@@ -84,7 +91,7 @@ public class ReceiverActivity extends AppCompatActivity {
 
                             if (assidText[i] != 0) {
                                 print += assidText[i];
-                                print += " ";
+                                print += "";
                             }
                         }
                         //txtAssid.setText(print);
@@ -94,7 +101,9 @@ public class ReceiverActivity extends AppCompatActivity {
                             public void run() {
                                 TextView txtAssid = (TextView) findViewById(R.id.txtASSID);
                                 txtAssid.setText(print);
-                                print = new String();
+                               clipPrint = print;
+                                print = "" ;
+
                             }
                         });
 

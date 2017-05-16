@@ -1,10 +1,13 @@
 package com.example.flore.myapplication;
 
+import android.content.ClipData;
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.content.ClipboardManager;
 
 public class SenderActivity extends AppCompatActivity {
     Sender mySender = new Sender();
@@ -55,6 +58,8 @@ public class SenderActivity extends AppCompatActivity {
                     mySender.stopEmission();
                     isEmitting = false;
                     enableButtons(false);
+
+
 
                     break;
                     }

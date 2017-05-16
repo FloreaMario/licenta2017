@@ -55,6 +55,8 @@ public class Receiver {
     double[] assid1 = new double[100];
     double[] assid2 = new double[100];
     double[] assid3 = new double[100];
+    double[] assid1old = new double[100];
+    double[] assid2old = new double[100];
 
     boolean commBit = false;//SOF and EOF bit
     boolean commFrame = true;
@@ -121,6 +123,8 @@ public class Receiver {
         assid1 = new double[100];
         assid2 = new double[100];
         assid3 = new double[100];
+        assid1old = new double[100];
+        assid2old = new double[100];
         return assid;
 
     }
@@ -155,16 +159,19 @@ public class Receiver {
 
             //parse the fft buffer and check for existent frequencies
             getAssid();
+
             boSize = false;
             check = false;
-            for(int i = 0; i<20; i++)
-            {
-                if((assid1[i] != 0) || (assid2[i] != 0))
-                {
-                    check = true;
+
+                for (int i = 0; i < 20; i++) {
+                    if (((assid1[i] != 0) || (assid2[i] != 0)) && ((assid1[i] !=assid1old[i]) || (assid2[i] != assid2old[i]))) {
+                        check = true;
+                        assid1old = assid1;
+                        assid2old = assid2;
+                    }
+
                 }
 
-            }
             if(check == true){
                 boSize = myVocab.checkSize(assid1, assid2);
                 if(boSize == true)
@@ -176,7 +183,7 @@ public class Receiver {
                 }
                 else
                 {
-
+                    check = false;
                 }
             }
 
@@ -203,7 +210,7 @@ public class Receiver {
 
         }
         avgFreq = sum / counterBin;
-        MAXFREQ = (int)avgFreq + 1000;
+        MAXFREQ = (int)avgFreq + 1300;
 
         //parse the fft buffer and check for existent frequencies
         for (int i = MINIMBIN; i < mag.length; ++i)
