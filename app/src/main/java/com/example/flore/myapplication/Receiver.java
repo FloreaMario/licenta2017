@@ -92,7 +92,7 @@ public class Receiver {
             public void run() {
 
                 performFFTonRecording();
-                //writeAudioDataToFile();
+
             }
         }, "AudioRecorder Thread");
         recordingThread.start();
@@ -137,7 +137,6 @@ public class Receiver {
 
         DoubleFFT_1D fft1d = new DoubleFFT_1D(BufferElements2Rec);
         j = 0;
-
 
         while (isRecording) {
             //recording Audio data into sData

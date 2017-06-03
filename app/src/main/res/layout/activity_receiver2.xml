@@ -10,28 +10,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.flore.myapplication.ReceiverActivity">
 
-    <Button
-        android:text="Start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="120dp"
-        android:id="@+id/btnStart" />
-
-    <Button
-        android:text="Stop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="23dp"
-        android:layout_marginEnd="23dp"
-        android:id="@+id/btnStop"
-        android:layout_alignBaseline="@+id/btnStart"
-        android:layout_alignBottom="@+id/btnStart"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
     <TextView
         android:text="Press start to start recording"
         android:layout_width="wrap_content"
@@ -39,7 +17,8 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:id="@+id/textView4" />
+        android:id="@+id/textView4"
+        android:textSize="30sp" />
 
     <TextView
         android:text="ASSID                                      "
@@ -47,7 +26,28 @@
         android:layout_height="match_parent"
         android:id="@+id/txtASSID"
         android:layout_below="@+id/btnStart"
-        android:layout_marginTop="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="72dp" />
+
+    <Button
+        android:text="Start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="141dp"
+        android:id="@+id/btnStart"
+        android:layout_below="@+id/textView4"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:text="Stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="22dp"
+        android:layout_marginEnd="22dp"
+        android:id="@+id/btnStop"
+        android:layout_above="@+id/txtASSID"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
